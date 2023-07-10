@@ -1,15 +1,24 @@
-# This is a sample Python script.
+from dash import Dash, html, dcc, callback, Output, Input
+import plotly.express as px
+import pandas as pd
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-from jtop import jtop
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
 
+app = Dash(__name__)
 
+app.layout = html.Div([
+    html.H1(children='Title of Dash App', style={'textAlign':'center'}),
+    dcc.Dropdown(df.country.unique(), 'Canada', id='dropdown-selection'),
+    dcc.Graph(id='graph-content')
+])
 
-# Press the green button in the gutter to run the script.
+@callback(
+    Output('graph-content', 'figure'),
+    Input('dropdown-selection', 'value')
+)
+def update_graph(value):
+    dff = df[df.country==value]
+    return px.line(dff, x='year', y='pop')
+
 if __name__ == '__main__':
-    with jtop() as jetson:
-    # jetson.ok() will provide the proper update frequency
-        while jetson.ok():
-        # Read tegra stats
-            print(jetson.cpu)
+    app.run(debug=True)
